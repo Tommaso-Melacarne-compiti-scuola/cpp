@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CLionExternalBuildManager">
+    <target id="31dae5fb-39aa-4f68-89e3-c7b045fd1574" name="Build all" defaultType="TOOL">
+      <configuration id="10b75cf2-b6bf-4ad3-b8a2-d6f086858450" name="Build all" toolchainName="Default">
+        <build type="TOOL">
+          <tool actionId="Tool_External Tools_Build all custom script" />
+        </build>
+      </configuration>
+    </target>
+  </component>
+</project>
