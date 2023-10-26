@@ -14,7 +14,7 @@ find . -path "*${dir_to_build}*" -type d | while read -r dir; do
     filename=$(basename "$file" ".cpp")
     # shellcheck disable=SC2164
     pushd "$dir" > /dev/null
-    if g++ -Wall -Wextra -pedantic "$filename.cpp" -o "$filename"; then
+    if g++ -Wall -Wextra -pedantic -Wshadow -Wformat=2 -Wcast-align -Wconversion -Wsign-conversion -Wnull-dereference "$filename.cpp" -o "$filename"; then
       echo "Built $filename in $dir"
       # shellcheck disable=SC2164
       popd > /dev/null
