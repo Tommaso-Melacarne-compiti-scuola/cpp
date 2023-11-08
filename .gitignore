@@ -6,3 +6,6 @@
 
 # Unignore all dirs
 !*/
+
+# Ignore all zip generated files inside the assignments/zip folder
+assignments/zip/*.zip
