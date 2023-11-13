@@ -1,8 +1,3 @@
-#pragma clang diagnostic push
-// Suppress warnings about the use of srand() and rand()
-#pragma ide diagnostic ignored "cert-msc50-cpp"
-#pragma ide diagnostic ignored "cert-msc51-cpp"
-
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -135,8 +130,6 @@ void printHowManyDaysToJacobeanDate(const int &day, const int &month, const int 
 }
 
 int main() {
-    srand(time(nullptr));
-
     int day, month, year;
     getDate(day, month, year);
     printDate(day, month, year);
@@ -147,5 +140,3 @@ int main() {
 
     return 0;
 }
-
-#pragma clang diagnostic pop
