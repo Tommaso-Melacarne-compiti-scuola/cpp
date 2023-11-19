@@ -1,6 +1,7 @@
 #include <iostream>
 #include <array>
 #include <algorithm>
+#include <optional>
 
 using namespace std;
 
@@ -17,7 +18,7 @@ int readNumber() {
     } while (true);
 }
 
-array<int, 4> numToArray(int n) {
+constexpr array<int, 4> numToArray(int n) {
     array<int, 4> digits{};
     for (int &digit: digits) {
         digit = n % 10;
@@ -26,7 +27,7 @@ array<int, 4> numToArray(int n) {
     return digits;
 }
 
-bool isVampire(const array<int, 4> &n, const int &nInt) {
+constexpr optional<tuple<int, int>> isVampire(const array<int, 4> &digits, const int &n) {
     array<int, 4> fangs{};
 
     for (int i = 0; i < 4; ++i) {
@@ -36,12 +37,11 @@ bool isVampire(const array<int, 4> &n, const int &nInt) {
                     if (k != i && k != j) {
                         for (int l = 0; l < 4; ++l) {
                             if (l != i && l != j && l != k) {
-                                fangs[0] = n[i] * 10 + n[j];
-                                fangs[1] = n[k] * 10 + n[l];
+                                fangs[0] = digits[i] * 10 + digits[j];
+                                fangs[1] = digits[k] * 10 + digits[l];
 
-                                if (nInt == fangs[0] * fangs[1]) {
-                                    cout << fangs[0] << " * " << fangs[1] << " = " << nInt << endl;
-                                    return true;
+                                if (n == fangs[0] * fangs[1]) {
+                                    return make_tuple(fangs[0], fangs[1]);
                                 }
                             }
                         }
@@ -51,11 +51,13 @@ bool isVampire(const array<int, 4> &n, const int &nInt) {
         }
     }
 
-    return false;
+    return nullopt;
 }
 
-void printVampire(const array<int, 4> &n, const int &nInt) {
-    if (isVampire(n, nInt)) {
+void printVampire(const array<int, 4> &digits, const int &n) {
+    auto fangs = isVampire(digits, n);
+    if (fangs.has_value()) {
+        cout << get<0>(fangs.value()) << " + " << get<1>(fangs.value()) << " = " << n << endl;
         cout << "Il numero è un numero vampiro" << endl;
     } else {
         cout << "Il numero non è un numero vampiro" << endl;
