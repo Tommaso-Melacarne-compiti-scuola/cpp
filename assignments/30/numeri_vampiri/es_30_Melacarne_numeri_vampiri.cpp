@@ -1,7 +1,6 @@
 #include <iostream>
 #include <array>
-#include <optional>
-#include <cmath>
+#include <algorithm>
 
 using namespace std;
 
@@ -27,49 +26,31 @@ array<int, 4> numToArray(int n) {
     return digits;
 }
 
-bool checkFang(int fang, const array<int, 4> &n) {
-    for (int digit: n) {
-        if (fang % 10 == digit) {
-            fang /= 10;
-        } else {
-            return false;
-        }
-    }
-    return true;
-}
-
-int factorial(const int n) {
-    long factor = 1;
-    for (int i = 1; i <= n; ++i)
-        factor *= i;
-    return (int) factor;
-}
-
-
 bool isVampire(const array<int, 4> &n, const int &nInt) {
-    int fang1, fang2;
-    double runs = factorial((int) n.size());
+    array<int, 4> fangs{};
 
-    for (int i = 0; i < runs; i++) {
-        for (int j = 0; j < runs; j++) {
-            fang1 = n[i % n.size()] * 10 +
-                    n[j % n.size()];
-            cout << "fang1: " << fang1 << endl;
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            if (j != i) {
+                for (int k = 0; k < 4; ++k) {
+                    if (k != i && k != j) {
+                        for (int l = 0; l < 4; ++l) {
+                            if (l != i && l != j && l != k) {
+                                fangs[0] = n[i] * 10 + n[j];
+                                fangs[1] = n[k] * 10 + n[l];
 
-            fang2 = n[(i + 1) % n.size()] * 10 +
-                    n[(j + 1) % n.size()];
-            cout << "fang2: " << fang2 << endl;
-            cout << "--" << endl;
-
-            if (fang1 * fang2 == nInt
-                && checkFang(fang1, n)
-                && checkFang(fang2, n)
-                && fang1 != fang2) {
-                cout << fang1 << " * " << fang2 << " = " << nInt << endl;
-                return true;
+                                if (nInt == fangs[0] * fangs[1]) {
+                                    cout << fangs[0] << " * " << fangs[1] << " = " << nInt << endl;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+
     return false;
 }
 
