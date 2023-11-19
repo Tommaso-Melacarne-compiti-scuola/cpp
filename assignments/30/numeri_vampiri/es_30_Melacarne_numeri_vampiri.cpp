@@ -1,6 +1,7 @@
 #include <iostream>
 #include <array>
 #include <optional>
+#include <cmath>
 
 using namespace std;
 
@@ -44,35 +45,32 @@ int factorial(const int n) {
     return (int) factor;
 }
 
-optional<tuple<int, int>> getFang(const array<int, 4> &n, const int &nInt) {
+
+bool isVampire(const array<int, 4> &n, const int &nInt) {
     int fang1, fang2;
-    int runs = (int) n.size();
+    double runs = factorial((int) n.size());
 
     for (int i = 0; i < runs; i++) {
         for (int j = 0; j < runs; j++) {
-            fang1 = n[i] * 10 + n[j];
+            fang1 = n[i % n.size()] * 10 +
+                    n[j % n.size()];
             cout << "fang1: " << fang1 << endl;
-            fang2 = n[(i + 1) % n.size()] * 10 + n[(j + 1) % n.size()];
+
+            fang2 = n[(i + 1) % n.size()] * 10 +
+                    n[(j + 1) % n.size()];
             cout << "fang2: " << fang2 << endl;
             cout << "--" << endl;
+
             if (fang1 * fang2 == nInt
                 && checkFang(fang1, n)
                 && checkFang(fang2, n)
                 && fang1 != fang2) {
                 cout << fang1 << " * " << fang2 << " = " << nInt << endl;
-                return make_tuple(fang1, fang2);
+                return true;
             }
         }
     }
-    return nullopt;
-}
-
-int factorial(unsigned long n) {
-
-}
-
-bool isVampire(const array<int, 4> &n, const int &nInt) {
-    return getFang(n, nInt).has_value();
+    return false;
 }
 
 void printVampire(const array<int, 4> &n, const int &nInt) {
