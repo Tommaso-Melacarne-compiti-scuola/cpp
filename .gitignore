@@ -9,3 +9,5 @@
 
 # Ignore all zip generated files inside the assignments/zip folder
 assignments/zip/*.zip
+
+cmake-build-debug
