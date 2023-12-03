@@ -56,9 +56,12 @@ void partiziona(const int vInit[], int vPart[], int n, int numPart) {
         if (vInit[i] <= numPart) nMinori++;
     }
     vPart[nMinori - 1] = numPart;
+    bool trovatoUguale = false;
     int indiceMinori = 0, indiceMaggiori = nMinori;
     for (int i = 0; i < n; i++) {
-        if (vInit[i] < numPart) {
+        if (vInit[i] == numPart && !trovatoUguale) {
+            trovatoUguale = true;
+        } else if (vInit[i] <= numPart) {
             vPart[indiceMinori] = vInit[i];
             indiceMinori++;
         } else if (vInit[i] > numPart) {
