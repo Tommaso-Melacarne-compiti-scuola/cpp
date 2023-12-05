@@ -8,7 +8,7 @@ constexpr int N = 10;
 array<int, N> getRandomArray() {
     array<int, N> arr{};
     for (auto &e: arr) {
-        e = rand() % 100;
+        e = rand() % 99 + 1;
     }
     return arr;
 }
@@ -19,41 +19,35 @@ void printArray(array<int, N> arr) {
     }
 }
 
+void partition(array<int, N> &arr) {
+    int pivotIdx = rand() % N;
+    int pivotValue = arr[pivotIdx];
 
-int partition(int arr[], int start, int end)
-{
-    int pivot = arr[start];
+    cout << "Elemento pivot: " << pivotValue << "\n";
 
-    int count = 0;
-    for (int i = start + 1; i <= end; i++) {
-        if (arr[i] <= pivot)
-            count++;
-    }
+    array<int, N> res{};
 
-    // Giving a pivot element its correct position
-    int pivotIndex = start + count;
-    swap(arr[pivotIndex], arr[start]);
+    int minorCursor = 0;
+    int majorCursor = N - 1;
 
-    // Sorting left and right parts of the pivot element
-    int i = start, j = end;
-
-    while (i < pivotIndex && j > pivotIndex) {
-        while (arr[i] <= pivot) {
-            i++;
-        }
-
-        while (arr[j] > pivot) {
-            j--;
-        }
-
-        if (i < pivotIndex && j > pivotIndex) {
-            swap(arr[i++], arr[j--]);
+    // Fills the array with the elements minor and major than the pivot
+    for (const auto &e: arr) {
+        if (e < pivotValue) {
+            res[minorCursor] = e;
+            minorCursor++;
+        } if (e > pivotValue) {
+            res[majorCursor] = e;
+            majorCursor--;
         }
     }
 
-    return pivotIndex;
+    // Fills the array with the elements equal to the pivot
+    for (int i = minorCursor; i <= majorCursor; i++) {
+        res[i] = pivotValue;
+    }
+
+    arr = res;
 }
-
 
 int main() {
     srand(time(nullptr));
@@ -62,15 +56,7 @@ int main() {
     cout << "Array prima della partizione: \n";
     printArray(numbers);
 
-    int pivotBeginningPos = rand() % N;
-    int pivot = numbers[pivotBeginningPos];
-    cout << "Elemento casuale: " << pivot << "\n";
-
-//    for (int i = 0; i < N; i++) {
-//        if (numbers[i] < pivot) {
-//            swap(numbers[i], pivot);
-//        }
-//    }
+    partition(numbers);
 
     cout << "Array dopo la partizione: \n";
     printArray(numbers);
