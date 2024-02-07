@@ -4,8 +4,8 @@
 
 using namespace std;
 
-constexpr int DIM_COL = 10;
-constexpr int DIM_ROW = DIM_COL;
+constexpr int DIM_ROW = 10;
+constexpr int DIM_COL = DIM_ROW;
 
 // Number of boats available
 constexpr int NUM_BOATS = 6;
@@ -61,23 +61,23 @@ std::ostream &operator<<(std::ostream &os, const Cell cell) {
 }
 
 // Tables for both players
-array<array<array<Cell, DIM_ROW>, DIM_COL>, 2> tables;
+array<array<array<Cell, DIM_COL>, DIM_ROW>, 2> tables;
 
 // Prints the table
-void printTable(const array<array<Cell, DIM_ROW>, DIM_COL> table) {
+void printTable(const array<array<Cell, DIM_COL>, DIM_ROW> table) {
     cout << "    ";
-    for (int i = 0; i < DIM_COL; i++) {
+    for (int i = 0; i < DIM_ROW; i++) {
         cout << i << " ";
     }
     cout << endl << "    ";
-    for (int i = 0; i < DIM_COL * 2 - 1; i++) {
+    for (int i = 0; i < DIM_ROW * 2 - 1; i++) {
         cout << "-";
     }
     cout << endl;
-    for (int i = 0; i < DIM_COL; i++) {
+    for (int i = 0; i < DIM_ROW; i++) {
         cout << i << " | ";
 
-        for (int j = 0; j < DIM_ROW; j++) {
+        for (int j = 0; j < DIM_COL; j++) {
             cout << table[i][j] << " ";
         }
         cout << endl;
@@ -101,9 +101,9 @@ enum Orientation {
 };
 
 // Adds a boat to the board, returns true if created successfully, otherwise returns false
-bool addBoat(const int startingCol, const int startingRow, const int boatDim, const Orientation orientation,
+bool addBoat(const int startingRow, const int startingCol, const int boatDim, const Orientation orientation,
              const int boatNumber,
-             array<array<Cell, DIM_ROW>, DIM_COL> &table) {
+             array<array<Cell, DIM_COL>, DIM_ROW> &table) {
     // The current boat we are adding
     Cell boatCell;
     switch (boatNumber) {
@@ -130,26 +130,26 @@ bool addBoat(const int startingCol, const int startingRow, const int boatDim, co
     }
 
     // Calculate the ending coordinates of the boat
-    int endingCol, endingRow;
+    int endingRow, endingCol;
     switch (orientation) {
         case Orientation::vertical:
-            endingCol = startingCol + boatDim - 1;
-            endingRow = startingRow;
+            endingRow = startingRow + boatDim - 1;
+            endingCol = startingCol;
             break;
         case Orientation::horizontal:
-            endingCol = startingCol;
-            endingRow = startingRow + boatDim - 1;
+            endingRow = startingRow;
+            endingCol = startingCol + boatDim - 1;
             break;
     }
 
     // Check if the boat is inside the board
-    if (endingCol > DIM_COL || endingRow > DIM_ROW) {
+    if (endingRow > DIM_ROW || endingCol > DIM_COL) {
         return false;
     }
 
     // Check if the boat is not overlapping with other boats
-    for (int i = startingCol; i <= endingCol; i++) {
-        for (int j = startingRow; j <= endingRow; j++) {
+    for (int i = startingRow; i <= endingRow; i++) {
+        for (int j = startingCol; j <= endingCol; j++) {
             if (table[i][j] != Cell::none) {
                 return false;
             }
@@ -159,7 +159,7 @@ bool addBoat(const int startingCol, const int startingRow, const int boatDim, co
     // Add the boat to the board
     for (int i = startingRow; i <= endingRow; i++) {
         for (int j = startingCol; j <= endingCol; j++) {
-            table[j][i] = boatCell;
+            table[i][j] = boatCell;
         }
     }
 
@@ -190,8 +190,8 @@ void addBoatMenu(int &startingCol, int &startingRow, Orientation &orientation, c
     do {
         cout << "Inserisci la colonna di partenza: ";
         cin >> startingCol;
-        if (startingCol < 0 || startingCol >= DIM_COL) {
-            cout << "Colonna non valida (0-" << DIM_COL - 1 << ")" << endl;
+        if (startingCol < 0 || startingCol >= DIM_ROW) {
+            cout << "Colonna non valida (0-" << DIM_ROW - 1 << ")" << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
@@ -203,8 +203,8 @@ void addBoatMenu(int &startingCol, int &startingRow, Orientation &orientation, c
     do {
         cout << "Inserisci la riga di partenza: ";
         cin >> startingRow;
-        if (startingRow < 0 || startingRow >= DIM_ROW) {
-            cout << "Riga non valida (0-" << DIM_ROW - 1 << ")" << endl;
+        if (startingRow < 0 || startingRow >= DIM_COL) {
+            cout << "Riga non valida (0-" << DIM_COL - 1 << ")" << endl;
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
@@ -289,19 +289,19 @@ void printBothTables() {
 
 
 // Gets a table from the user
-void getTableFromUser(array<array<Cell, DIM_ROW>, DIM_COL> &table, const int playerNumber) {
+void getTableFromUser(array<array<Cell, DIM_COL>, DIM_ROW> &table, const int playerNumber) {
     cout << "Inserisci il campo del player " << playerNumber << endl;
     for (int i = 0; i < NUM_BOATS; i++) {
-        int startingCol, startingRow, boatDim;
+        int startingRow, startingCol, boatDim;
         Orientation orientation;
         clearConsole();
         cout << "Inserisci la barca " << i + 1 << " di " << NUM_BOATS << " (di dimensione " << BOAT_SIZES[i] << ")"
              << endl;
         boatDim = BOAT_SIZES[i];
 
-        addBoatMenu(startingCol, startingRow, orientation, boatDim);
+        addBoatMenu(startingRow, startingCol, orientation, boatDim);
 
-        bool addedBoat = addBoat(startingCol, startingRow, boatDim, orientation, i + 1, table);
+        bool addedBoat = addBoat(startingRow, startingCol, boatDim, orientation, i + 1, table);
         // clearConsole();
         if (!addedBoat) {
             cout << "Impossibile aggiungere la barca, ripeti l'inserimento per favore" << endl;
@@ -320,7 +320,7 @@ pair<int, int> getFireCoordinates(const int playerNumber) {
     do {
         cout << "Player " << playerNumber << " Inserisci la colonna: ";
         cin >> col;
-        if (col < 0 || col >= DIM_COL) {
+        if (col < 0 || col >= DIM_ROW) {
             cout << "Colonna non valida" << endl;
             continue;
         } else {
@@ -331,7 +331,7 @@ pair<int, int> getFireCoordinates(const int playerNumber) {
     do {
         cout << "Player " << playerNumber << " Inserisci la riga: ";
         cin >> row;
-        if (row < 0 || row >= DIM_ROW) {
+        if (row < 0 || row >= DIM_COL) {
             cout << "Riga non valida" << endl;
             continue;
         } else {
@@ -344,7 +344,7 @@ pair<int, int> getFireCoordinates(const int playerNumber) {
 
 
 // Fires at the given coordinates, returns true if a boat was hit, otherwise returns false
-bool fireAtCoordinates(const int col, const int row, array<array<Cell, DIM_ROW>, DIM_COL> &table) {
+bool fireAtCoordinates(const int col, const int row, array<array<Cell, DIM_COL>, DIM_ROW> &table) {
     switch (table[row][col]) {
         case Cell::boat1:
         case Cell::boat2:
@@ -360,17 +360,17 @@ bool fireAtCoordinates(const int col, const int row, array<array<Cell, DIM_ROW>,
 }
 
 // Populates a table with random boats
-void getRandomTable(array<array<Cell, DIM_ROW>, DIM_COL> &table) {
+void getRandomTable(array<array<Cell, DIM_COL>, DIM_ROW> &table) {
     for (int i = 0; i < NUM_BOATS; i++) {
-        int startingCol, startingRow, boatDim;
+        int startingRow, startingCol, boatDim;
         Orientation orientation;
         boatDim = BOAT_SIZES[i];
 
         do {
-            startingCol = rand() % DIM_COL;
             startingRow = rand() % DIM_ROW;
+            startingCol = rand() % DIM_COL;
             orientation = static_cast<Orientation>(rand() % 2);
-        } while (!addBoat(startingCol, startingRow, boatDim, orientation, i + 1, table));
+        } while (!addBoat(startingRow, startingCol, boatDim, orientation, i + 1, table));
     }
 }
 
