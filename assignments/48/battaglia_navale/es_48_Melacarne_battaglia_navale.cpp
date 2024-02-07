@@ -16,35 +16,66 @@ void clearConsole() {
     if (system("CLS")) system("clear");
 }
 
-// A single cell of the table
-enum Slot {
-    boat,
+// A single Cell of the table
+enum Cell {
+    boat1,
+    boat2,
+    boat3,
+    boat4,
+    boat5,
+    boat6,
     boat_hit,
     none
 };
 
-// Overloads the << operator for the Slot enum, needed to print the enum character to display the table
-std::ostream &operator<<(std::ostream &os, const Slot slot) {
-    switch (slot) {
-        case Slot::boat:
-            os << 'O';
+// Overloads the << operator for the Cell enum, needed to print the enum character to display the table
+std::ostream &operator<<(std::ostream &os, const Cell cell) {
+    switch (cell) {
+        case Cell::boat1:
+            os << '1';
             break;
-        case Slot::boat_hit:
+        case Cell::boat2:
+            os << '2';
+            break;
+        case Cell::boat3:
+            os << '3';
+            break;
+        case Cell::boat4:
+            os << '4';
+            break;
+        case Cell::boat5:
+            os << '5';
+            break;
+        case Cell::boat6:
+            os << '6';
+            break;
+        case Cell::boat_hit:
             os << 'X';
             break;
-        case Slot::none:
-            os << ' ';
+        case Cell::none:
+            os << '0';
             break;
     }
     return os;
 }
 
 // Tables for both players
-array<array<array<Slot, DIM_Y>, DIM_X>, 2> tables;
+array<array<array<Cell, DIM_Y>, DIM_X>, 2> tables;
 
 // Prints the table
-void printTable(const array<array<Slot, DIM_Y>, DIM_X> table) {
+void printTable(const array<array<Cell, DIM_Y>, DIM_X> table) {
+    cout << "    ";
     for (int i = 0; i < DIM_X; i++) {
+        cout << i << " ";
+    }
+    cout << endl << "    ";
+    for (int i = 0; i < DIM_X * 2 - 1; i++) {
+        cout << "-";
+    }
+    cout << endl;
+    for (int i = 0; i < DIM_X; i++) {
+        cout << i << " | ";
+
         for (int j = 0; j < DIM_Y; j++) {
             cout << table[i][j] << " ";
         }
@@ -55,10 +86,10 @@ void printTable(const array<array<Slot, DIM_Y>, DIM_X> table) {
 // Clears both tables, setting all the slots to none
 constexpr void clearTables() {
     for (auto &row: tables[0])
-        row.fill(Slot::none);
+        row.fill(Cell::none);
 
     for (auto &row: tables[1])
-        row.fill(Slot::none);
+        row.fill(Cell::none);
 
 }
 
@@ -70,7 +101,33 @@ enum Orientation {
 
 // Adds a boat to the board, returns true if created successfully, otherwise returns false
 bool addBoat(const int startingPosX, const int startingPosY, const int boatDim, const Orientation orientation,
-             array<array<Slot, DIM_Y>, DIM_X> &table) {
+             const int boatNumber,
+             array<array<Cell, DIM_Y>, DIM_X> &table) {
+    // The current boat we are adding
+    Cell boatCell;
+    switch (boatNumber) {
+        case 1:
+            boatCell = Cell::boat1;
+            break;
+        case 2:
+            boatCell = Cell::boat2;
+            break;
+        case 3:
+            boatCell = Cell::boat3;
+            break;
+        case 4:
+            boatCell = Cell::boat4;
+            break;
+        case 5:
+            boatCell = Cell::boat5;
+            break;
+        case 6:
+            boatCell = Cell::boat6;
+            break;
+        default:
+            return false;
+    }
+
     // Check if the boat is inside the board
     int endingPosX, endingPosY;
     if (orientation == Orientation::horizontal) {
@@ -88,20 +145,24 @@ bool addBoat(const int startingPosX, const int startingPosY, const int boatDim, 
     // Check if the boat is not overlapping with other boats
     for (int i = startingPosX; i < endingPosX; i++) {
         for (int j = startingPosY; j < endingPosY; j++) {
-            if (table[i][j] == Slot::boat) {
-                return false;
+            switch (table[i][j]) {
+                case Cell::boat1:
+                case Cell::boat2:
+                case Cell::boat3:
+                case Cell::boat4:
+                case Cell::boat5:
+                case Cell::boat6:
+                    return false;
+                default:
+                    continue;
             }
         }
     }
 
     // Add the boat to the board
-    if (orientation == Orientation::horizontal) {
-        for (int i = startingPosY; i < endingPosY; i++) {
-            table[startingPosX][i] = Slot::boat;
-        }
-    } else if (orientation == Orientation::vertical) {
-        for (int i = startingPosX; i < endingPosX; i++) {
-            table[i][startingPosY] = Slot::boat;
+    for (int i = startingPosX; i <= endingPosX; i++) {
+        for (int j = startingPosY; j <= endingPosY; j++) {
+            table[i][j] = boatCell;
         }
     }
 
@@ -171,21 +232,46 @@ void addBoatMenu(int &startingPosX, int &startingPosY, Orientation &orientation,
 
 // Checks if a player has won, returns true if a player has won, otherwise returns false
 bool playerWon() {
-    int boatsPlayer1 = 0;
-    int boatsPlayer2 = 0;
+    // Set to true if player 1 has at least one boat
+    bool foundBoatsPlayer1 = false;
 
-    for (int i = 0; i < DIM_X; i++) {
-        for (int j = 0; j < DIM_Y; j++) {
-            if (tables[0][i][j] == Slot::boat) {
-                boatsPlayer1++;
-            }
-            if (tables[1][i][j] == Slot::boat) {
-                boatsPlayer2++;
+    for (auto &row: tables[0]) {
+        for (auto &cell: row) {
+            switch (cell) {
+                case Cell::boat1:
+                case Cell::boat2:
+                case Cell::boat3:
+                case Cell::boat4:
+                case Cell::boat5:
+                case Cell::boat6:
+                    foundBoatsPlayer1 = true;
+                    break;
+                default:
+                    continue;
             }
         }
     }
 
-    return boatsPlayer1 == 0 || boatsPlayer2 == 0;
+    // Set to true if player 2 has at least one boat
+    bool foundBoatsPlayer2 = false;
+    for (auto &row: tables[1]) {
+        for (auto &cell: row) {
+            switch (cell) {
+                case Cell::boat1:
+                case Cell::boat2:
+                case Cell::boat3:
+                case Cell::boat4:
+                case Cell::boat5:
+                case Cell::boat6:
+                    foundBoatsPlayer2 = true;
+                    break;
+                default:
+                    continue;
+            }
+        }
+    }
+
+    return !foundBoatsPlayer1 || !foundBoatsPlayer2;
 }
 
 // Prints both tables
@@ -199,7 +285,7 @@ void printBothTables() {
 
 
 // Gets a table from the user
-void getTableFromUser(array<array<Slot, DIM_Y>, DIM_X> &table, const int playerNumber) {
+void getTableFromUser(array<array<Cell, DIM_Y>, DIM_X> &table, const int playerNumber) {
     cout << "Inserisci il campo del player " << playerNumber << endl;
     for (int i = 0; i < NUM_BOATS; i++) {
         int startingPosX, startingPosY, boatDim;
@@ -208,7 +294,8 @@ void getTableFromUser(array<array<Slot, DIM_Y>, DIM_X> &table, const int playerN
              << endl;
         boatDim = BOAT_SIZES[i];
         addBoatMenu(startingPosX, startingPosY, orientation, boatDim);
-        bool addedBoat = addBoat(startingPosX, startingPosY, boatDim, orientation, table);
+        bool addedBoat = addBoat(startingPosX, startingPosY, boatDim, orientation, i + 1, table);
+        // clearConsole();
         if (!addedBoat) {
             cout << "Impossibile aggiungere la barca, ripeti l'inserimento per favore" << endl;
             i--;
@@ -250,12 +337,19 @@ pair<int, int> getFireCoordinates(const int playerNumber) {
 
 
 // Fires at the given coordinates, returns true if a boat was hit, otherwise returns false
-bool fireAtCoordinates(const int x, const int y, array<array<Slot, DIM_Y>, DIM_X> &table) {
-    if (table[x][y] == Slot::boat) {
-        table[x][y] = Slot::boat_hit;
-        return true;
+bool fireAtCoordinates(const int x, const int y, array<array<Cell, DIM_Y>, DIM_X> &table) {
+    switch (table[x][y]) {
+        case Cell::boat1:
+        case Cell::boat2:
+        case Cell::boat3:
+        case Cell::boat4:
+        case Cell::boat5:
+        case Cell::boat6:
+            table[x][y] = Cell::boat_hit;
+            return true;
+        default:
+            return false;
     }
-    return false;
 }
 
 
