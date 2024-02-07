@@ -1,5 +1,6 @@
 #include <iostream>
 #include <array>
+#include <limits>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ void clearConsole() {
     if (system("CLS")) system("clear");
 }
 
-// A single Cell of the table
+// A single Cell of the table: can be a boat, a boat hit or none
 enum Cell {
     boat1,
     boat2,
@@ -128,9 +129,8 @@ bool addBoat(const int startingCol, const int startingRow, const int boatDim, co
             return false;
     }
 
-    // Check if the boat is inside the board
+    // Calculate the ending coordinates of the boat
     int endingCol, endingRow;
-
     switch (orientation) {
         case Orientation::vertical:
             endingCol = startingCol + boatDim - 1;
@@ -142,6 +142,7 @@ bool addBoat(const int startingCol, const int startingRow, const int boatDim, co
             break;
     }
 
+    // Check if the boat is inside the board
     if (endingCol > DIM_COL || endingRow > DIM_ROW) {
         return false;
     }
@@ -199,6 +200,8 @@ void addBoatMenu(int &startingCol, int &startingRow, Orientation &orientation, c
         cin >> startingCol;
         if (startingCol < 0 || startingCol >= DIM_COL) {
             cout << "Colonna non valida (0-" << DIM_COL - 1 << ")" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         } else {
             break;
@@ -210,6 +213,8 @@ void addBoatMenu(int &startingCol, int &startingRow, Orientation &orientation, c
         cin >> startingRow;
         if (startingRow < 0 || startingRow >= DIM_ROW) {
             cout << "Riga non valida (0-" << DIM_ROW - 1 << ")" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         } else {
             break;
@@ -225,8 +230,11 @@ void addBoatMenu(int &startingCol, int &startingRow, Orientation &orientation, c
     do {
         cout << "Inserisci l'orientamento (o/v): ";
         cin >> orientation;
-        if (orientation != Orientation::horizontal && orientation != Orientation::vertical) {
+        if (cin.fail()) {
             cout << "Orientamento non valido" << endl;
+            // Clear the input buffer and ignore
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         } else {
             break;
@@ -316,12 +324,12 @@ void getTableFromUser(array<array<Cell, DIM_ROW>, DIM_COL> &table, const int pla
 // Asks the player for the coordinates to fireAtCoordinates at
 pair<int, int> getFireCoordinates(const int playerNumber) {
     cout << "Player " << playerNumber << " è il tuo turno!" << endl;
-    int x, y;
+    int col, row;
     do {
-        cout << "Player " << playerNumber << " Inserisci la coordinata x: ";
-        cin >> x;
-        if (x < 0 || x >= DIM_COL) {
-            cout << "Coordinata x non valida" << endl;
+        cout << "Player " << playerNumber << " Inserisci la colonna: ";
+        cin >> col;
+        if (col < 0 || col >= DIM_COL) {
+            cout << "Colonna non valida" << endl;
             continue;
         } else {
             break;
@@ -329,17 +337,17 @@ pair<int, int> getFireCoordinates(const int playerNumber) {
     } while (true);
 
     do {
-        cout << "Player " << playerNumber << " Inserisci la coordinata y: ";
-        cin >> y;
-        if (y < 0 || y >= DIM_ROW) {
-            cout << "Coordinata y non valida" << endl;
+        cout << "Player " << playerNumber << " Inserisci la riga: ";
+        cin >> row;
+        if (row < 0 || row >= DIM_ROW) {
+            cout << "Riga non valida" << endl;
             continue;
         } else {
             break;
         }
     } while (true);
 
-    return {x, y};
+    return {col, row};
 }
 
 
@@ -361,6 +369,7 @@ bool fireAtCoordinates(const int x, const int y, array<array<Cell, DIM_ROW>, DIM
 
 
 int main() {
+    srand(time(nullptr));
     clearTables();
 
     printBothTables();
