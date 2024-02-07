@@ -148,18 +148,10 @@ bool addBoat(const int startingCol, const int startingRow, const int boatDim, co
     }
 
     // Check if the boat is not overlapping with other boats
-    for (int i = startingCol; i < endingCol; i++) {
-        for (int j = startingRow; j < endingRow; j++) {
-            switch (table[i][j]) {
-                case Cell::boat1:
-                case Cell::boat2:
-                case Cell::boat3:
-                case Cell::boat4:
-                case Cell::boat5:
-                case Cell::boat6:
-                    return false;
-                default:
-                    continue;
+    for (int i = startingCol; i <= endingCol; i++) {
+        for (int j = startingRow; j <= endingRow; j++) {
+            if (table[i][j] != Cell::none) {
+                return false;
             }
         }
     }
