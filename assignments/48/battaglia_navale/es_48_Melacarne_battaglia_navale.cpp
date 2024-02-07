@@ -19,14 +19,14 @@ void clearConsole() {
 
 // A single Cell of the table: can be a boat, a boat hit or none
 enum Cell {
-    boat1,
-    boat2,
-    boat3,
-    boat4,
-    boat5,
-    boat6,
-    boat_hit,
-    none
+    boat_hit = -1,
+    none = 0,
+    boat1 = 1,
+    boat2 = 2,
+    boat3 = 3,
+    boat4 = 4,
+    boat5 = 5,
+    boat6 = 6,
 };
 
 // Overloads the << operator for the Cell enum, needed to print the enum character to display the table
@@ -96,8 +96,8 @@ constexpr void clearTables() {
 
 // Orientation of the boat
 enum Orientation {
-    vertical,
-    horizontal
+    vertical = 0,
+    horizontal = 1
 };
 
 bool checkIfBoatCanBeAdded(const int startingRow, const int startingCol, const int endingRow, const int endingCol,
