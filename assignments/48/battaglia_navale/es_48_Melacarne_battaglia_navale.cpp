@@ -121,7 +121,6 @@ bool checkIfBoatCanBeAdded(const int startingRow, const int startingCol, const i
 }
 
 
-
 // Adds a boat to the board, returns true if created successfully, otherwise returns false
 bool addBoat(int startingRow, int startingCol, const int boatDim, const Orientation orientation,
              const int boatNumber,
@@ -455,18 +454,18 @@ int main() {
         bool hit = fireAtCoordinates(col, row, tables[thisTurnOtherPlayer]);
 
         if (hit) {
+            // TODO: Add feedback if the player destroyed a boat
             cout << "Hai colpito una barca!" << endl;
+
+            if (playerWon()) {
+                cout << "Player " << thisTurnPlayer + 1 << " ha vinto!" << endl;
+                break;
+            }
         } else {
             cout << "Nessuna barca colpita" << endl;
         }
 
         turn++;
-
-
-        if (playerWon()) {
-            cout << "Player " << thisTurnPlayer + 1 << " ha vinto!" << endl;
-            break;
-        }
 
         printBothTables();
 
