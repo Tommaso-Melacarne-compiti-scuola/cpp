@@ -100,6 +100,7 @@ enum Orientation {
     horizontal = 1
 };
 
+// Checks if a boat can be added to the board, returns true if the boat can be added, otherwise returns false
 bool checkIfBoatCanBeAdded(const int startingRow, const int startingCol, const int endingRow, const int endingCol,
                            array<array<Cell, DIM_COL>, DIM_ROW> &table) {
     // Check if the boat is inside the board
@@ -389,6 +390,7 @@ void getRandomTable(array<array<Cell, DIM_COL>, DIM_ROW> &table) {
     }
 }
 
+// Displays the start menu and takes the user's choice
 int getStartMenuOption() {
     cout << "Benvenuto in Battaglia Navale!\n"
             "Selezione una delle seguenti opzioni:\n"
@@ -410,7 +412,7 @@ int getStartMenuOption() {
     return choice;
 }
 
-
+// Displays the start menu and fills the tables accordingly
 void startMenu() {
     int choice = getStartMenuOption();
 
@@ -430,10 +432,6 @@ void startMenu() {
         case 3:
             exit(0);
     }
-
-    cout << "Entrambi i giocatori hanno inserito le loro barche, inizia il gioco!\n"
-            "Campi iniziali: \n";
-    printBothTables();
 }
 
 
@@ -442,6 +440,10 @@ int main() {
     clearTables();
 
     startMenu();
+
+    cout << "Entrambi i giocatori hanno inserito le loro barche, inizia il gioco!\n"
+            "Campi iniziali: \n";
+    printBothTables();
 
     int turn = 0;
     do {
