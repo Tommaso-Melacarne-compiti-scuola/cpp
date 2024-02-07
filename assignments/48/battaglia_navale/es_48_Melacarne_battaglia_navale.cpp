@@ -14,7 +14,7 @@ constexpr int BOAT_SIZES[NUM_BOATS] = {4, 3, 3, 2, 2, 1};
 
 // Clears the console, works on both Windows and Unix systems
 void clearConsole() {
-    if (system("CLS")) system("clear");
+    system("clear");
 }
 
 // A single Cell of the table: can be a boat, a boat hit or none
@@ -54,7 +54,7 @@ std::ostream &operator<<(std::ostream &os, const Cell cell) {
             os << 'X';
             break;
         case Cell::none:
-            os << '0';
+            os << ' ';
             break;
     }
     return os;
@@ -157,9 +157,9 @@ bool addBoat(const int startingCol, const int startingRow, const int boatDim, co
     }
 
     // Add the boat to the board
-    for (int i = startingCol; i <= endingCol; i++) {
-        for (int j = startingRow; j <= endingRow; j++) {
-            table[i][j] = boatCell;
+    for (int i = startingRow; i <= endingRow; i++) {
+        for (int j = startingCol; j <= endingCol; j++) {
+            table[j][i] = boatCell;
         }
     }
 
@@ -294,6 +294,7 @@ void getTableFromUser(array<array<Cell, DIM_ROW>, DIM_COL> &table, const int pla
     for (int i = 0; i < NUM_BOATS; i++) {
         int startingCol, startingRow, boatDim;
         Orientation orientation;
+        clearConsole();
         cout << "Inserisci la barca " << i + 1 << " di " << NUM_BOATS << " (di dimensione " << BOAT_SIZES[i] << ")"
              << endl;
         boatDim = BOAT_SIZES[i];
@@ -307,8 +308,7 @@ void getTableFromUser(array<array<Cell, DIM_ROW>, DIM_COL> &table, const int pla
             i--;
         }
 
-        cout << "Campo player " << playerNumber << " dopo l'inserimento della barca " << i + 1 << " di " << NUM_BOATS
-             << endl;
+        cout << "Campo player " << playerNumber << ":" << endl;
         printTable(table);
     }
 }
@@ -344,19 +344,81 @@ pair<int, int> getFireCoordinates(const int playerNumber) {
 
 
 // Fires at the given coordinates, returns true if a boat was hit, otherwise returns false
-bool fireAtCoordinates(const int x, const int y, array<array<Cell, DIM_ROW>, DIM_COL> &table) {
-    switch (table[x][y]) {
+bool fireAtCoordinates(const int col, const int row, array<array<Cell, DIM_ROW>, DIM_COL> &table) {
+    switch (table[row][col]) {
         case Cell::boat1:
         case Cell::boat2:
         case Cell::boat3:
         case Cell::boat4:
         case Cell::boat5:
         case Cell::boat6:
-            table[x][y] = Cell::boat_hit;
+            table[row][col] = Cell::boat_hit;
             return true;
         default:
             return false;
     }
+}
+
+// Populates a table with random boats
+void getRandomTable(array<array<Cell, DIM_ROW>, DIM_COL> &table) {
+    for (int i = 0; i < NUM_BOATS; i++) {
+        int startingCol, startingRow, boatDim;
+        Orientation orientation;
+        boatDim = BOAT_SIZES[i];
+
+        do {
+            startingCol = rand() % DIM_COL;
+            startingRow = rand() % DIM_ROW;
+            orientation = static_cast<Orientation>(rand() % 2);
+        } while (!addBoat(startingCol, startingRow, boatDim, orientation, i + 1, table));
+    }
+}
+
+int getStartMenuOption() {
+    cout << "Benvenuto in Battaglia Navale!\n"
+            "Selezione una delle seguenti opzioni:\n"
+            "1. Inizia il gioco inserendo le barche\n"
+            "2. Inizia il gioco con barche random\n"
+            "3. Esci\n";
+    int choice;
+    do {
+        cout << "Scelta: ";
+        cin >> choice;
+        if (choice < 1 || choice > 3) {
+            cout << "Scelta non valida" << endl;
+            continue;
+        } else {
+            break;
+        }
+    } while (true);
+
+    return choice;
+}
+
+
+void startMenu() {
+    int choice = getStartMenuOption();
+
+    switch (choice) {
+        case 1:
+            for (int i = 0; i < 2; i++) {
+                getTableFromUser(tables[i], i + 1);
+                clearConsole();
+            }
+            break;
+        case 2:
+            for (auto &table: tables) {
+                getRandomTable(table);
+            }
+            clearConsole();
+            break;
+        case 3:
+            exit(0);
+    }
+
+    cout << "Entrambi i giocatori hanno inserito le loro barche, inizia il gioco!\n"
+            "Campi iniziali: \n";
+    printBothTables();
 }
 
 
@@ -364,22 +426,16 @@ int main() {
     srand(time(nullptr));
     clearTables();
 
-    printBothTables();
-
-    getTableFromUser(tables[0], 1);
-    clearConsole();
-    getTableFromUser(tables[1], 2);
-    clearConsole();
-
-    cout << "Entrambi i giocatori hanno inserito le loro barche, inizia il gioco!" << endl;
+    startMenu();
 
     int turn = 0;
     do {
         int thisTurnPlayer = turn % 2;
 
-        auto [x, y] = getFireCoordinates(thisTurnPlayer + 1);
+        auto [col, row] = getFireCoordinates(thisTurnPlayer + 1);
 
-        bool hit = fireAtCoordinates(x, y, tables[thisTurnPlayer]);
+        int thisTurnOtherPlayer = (thisTurnPlayer + 1) % 2;
+        bool hit = fireAtCoordinates(col, row, tables[thisTurnOtherPlayer]);
 
         if (hit) {
             cout << "Hai colpito una barca!" << endl;
@@ -399,7 +455,6 @@ int main() {
 
         clearConsole();
     } while (true);
-
 
     return 0;
 }
