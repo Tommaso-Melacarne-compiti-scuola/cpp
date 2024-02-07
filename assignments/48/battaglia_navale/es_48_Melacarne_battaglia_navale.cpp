@@ -100,10 +100,34 @@ enum Orientation {
     horizontal
 };
 
+bool checkIfBoatCanBeAdded(const int startingRow, const int startingCol, const int endingRow, const int endingCol,
+                           array<array<Cell, DIM_COL>, DIM_ROW> &table) {
+    // Check if the boat is inside the board
+    if (endingRow > DIM_ROW || endingCol > DIM_COL) {
+        return false;
+    }
+
+    // Check if the boat is not overlapping with other boats
+    for (int i = startingRow; i <= endingRow; i++) {
+        for (int j = startingCol; j <= endingCol; j++) {
+            if (table[i][j] != Cell::none) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+
 // Adds a boat to the board, returns true if created successfully, otherwise returns false
-bool addBoat(const int startingRow, const int startingCol, const int boatDim, const Orientation orientation,
+bool addBoat(int startingRow, int startingCol, const int boatDim, const Orientation orientation,
              const int boatNumber,
              array<array<Cell, DIM_COL>, DIM_ROW> &table) {
+    // Swap the starting row and column for a more intuitive input
+    swap(startingRow, startingCol);
+
     // The current boat we are adding
     Cell boatCell;
     switch (boatNumber) {
@@ -142,18 +166,9 @@ bool addBoat(const int startingRow, const int startingCol, const int boatDim, co
             break;
     }
 
-    // Check if the boat is inside the board
-    if (endingRow > DIM_ROW || endingCol > DIM_COL) {
+    // Check if the boat can be added
+    if (!checkIfBoatCanBeAdded(startingRow, startingCol, endingRow, endingCol, table)) {
         return false;
-    }
-
-    // Check if the boat is not overlapping with other boats
-    for (int i = startingRow; i <= endingRow; i++) {
-        for (int j = startingCol; j <= endingCol; j++) {
-            if (table[i][j] != Cell::none) {
-                return false;
-            }
-        }
     }
 
     // Add the boat to the board
