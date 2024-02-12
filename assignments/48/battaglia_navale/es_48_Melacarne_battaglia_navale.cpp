@@ -1,8 +1,11 @@
 #include <iostream>
 #include <array>
 #include <limits>
+#include <vector>
 
 using namespace std;
+
+#define DEBUG 0
 
 constexpr int DIM_ROW = 10;
 constexpr int DIM_COL = DIM_ROW;
@@ -100,11 +103,30 @@ enum Orientation {
     horizontal = 1
 };
 
+// Overloads the >> operator for the Orientation enum, needed to read the orientation from the user
+std::istream &operator>>(std::istream &is, Orientation &orientation) {
+    char orientationInput;
+    is >> orientationInput;
+
+    switch (orientationInput) {
+        case 'o':
+            orientation = Orientation::horizontal;
+            break;
+        case 'v':
+            orientation = Orientation::vertical;
+            break;
+        default:
+            is.setstate(std::ios_base::failbit);
+    }
+
+    return is;
+}
+
 // Checks if a boat can be added to the board, returns true if the boat can be added, otherwise returns false
 bool checkIfBoatCanBeAdded(const int startingRow, const int startingCol, const int endingRow, const int endingCol,
                            array<array<Cell, DIM_COL>, DIM_ROW> &table) {
     // Check if the boat is inside the board
-    if (endingRow > DIM_ROW || endingCol > DIM_COL) {
+    if (endingRow >= DIM_ROW || endingCol >= DIM_COL) {
         return false;
     }
 
@@ -181,24 +203,6 @@ bool addBoat(int startingRow, int startingCol, const int boatDim, const Orientat
     return true;
 }
 
-// Overloads the >> operator for the Orientation enum, needed to read the orientation from the user
-std::istream &operator>>(std::istream &is, Orientation &orientation) {
-    char orientationInput;
-    is >> orientationInput;
-
-    switch (orientationInput) {
-        case 'o':
-            orientation = Orientation::horizontal;
-            break;
-        case 'v':
-            orientation = Orientation::vertical;
-            break;
-        default:
-            is.setstate(std::ios_base::failbit);
-    }
-
-    return is;
-}
 
 // Menu to add a boat to the board
 void addBoatMenu(int &startingCol, int &startingRow, Orientation &orientation, const int boatDim) {
@@ -295,13 +299,11 @@ bool playerWon() {
 
 // Prints both tables
 void printBothTables() {
-    cout << "Campo player 1: \n";
-    printTable(tables[0]);
-
-    cout << "Campo player 2: \n";
-    printTable(tables[1]);
+    for (int i = 0; i < tables.size(); i++) {
+        cout << "Campo player " << i + 1 << ": \n";
+        printTable(tables[i]);
+    }
 }
-
 
 // Gets a table from the user
 void getTableFromUser(array<array<Cell, DIM_COL>, DIM_ROW> &table, const int playerNumber) {
@@ -357,21 +359,60 @@ pair<int, int> getFireCoordinates(const int playerNumber) {
     return {col, row};
 }
 
+// Scans the table to check if the other pieces of the boat are present, returns true if the boat is still present,
+// otherwise returns false
+bool scanTableCheckIfOtherPiecesOfBoat(array<array<Cell, DIM_COL>, DIM_ROW> &table, Cell boatHit) {
+    for (auto &row: table) {
+        for (auto &cell: row) {
+            if (cell == boatHit) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
-// Fires at the given coordinates, returns true if a boat was hit, otherwise returns false
-bool fireAtCoordinates(const int col, const int row, array<array<Cell, DIM_COL>, DIM_ROW> &table) {
+enum fireResult {
+    miss = 0,
+    hit = 1,
+    sunk = 2
+};
+
+// Fires at the given coordinates, returns the result of the fire
+fireResult fireAtCoordinates(const int col, const int row, array<array<Cell, DIM_COL>, DIM_ROW> &table) {
+
+    Cell boatHitType;
+
     switch (table[row][col]) {
         case Cell::boat1:
+            boatHitType = Cell::boat1;
+            break;
         case Cell::boat2:
+            boatHitType = Cell::boat2;
+            break;
         case Cell::boat3:
+            boatHitType = Cell::boat3;
+            break;
         case Cell::boat4:
+            boatHitType = Cell::boat4;
+            break;
         case Cell::boat5:
+            boatHitType = Cell::boat5;
+            break;
         case Cell::boat6:
-            table[row][col] = Cell::boat_hit;
-            return true;
+            boatHitType = Cell::boat6;
+            break;
         default:
-            return false;
+            return fireResult::miss;
     }
+
+    // If we arrived here, the boat was hit
+    table[row][col] = Cell::boat_hit;
+    if (!scanTableCheckIfOtherPiecesOfBoat(table, boatHitType)) {
+        return fireResult::sunk;
+    }
+
+    return fireResult::hit;
 }
 
 // Populates a table with random boats
@@ -389,19 +430,48 @@ void getRandomTable(array<array<Cell, DIM_COL>, DIM_ROW> &table) {
     }
 }
 
-// Displays the start menu and takes the user's choice
-int getStartMenuOption() {
-    cout << "Benvenuto in Battaglia Navale!\n"
-            "Selezione una delle seguenti opzioni:\n"
+enum fillMode {
+    userFill = 0,
+    randomFill = 1,
+    exitFillMode = 2
+};
+
+// Overloads the >> operator for the fillMode enum, needed to read the orientation from the user
+std::istream &operator>>(std::istream &is, fillMode &orientation) {
+    int choice;
+    is >> choice;
+
+    switch (choice) {
+        case 1:
+            orientation = fillMode::userFill;
+            break;
+        case 2:
+            orientation = fillMode::randomFill;
+            break;
+        case 3:
+            orientation = fillMode::exitFillMode;
+            break;
+        default:
+            is.setstate(std::ios_base::failbit);
+    }
+
+    return is;
+}
+
+// Menu to choose the fill mode, returns the choice
+fillMode getFillMode() {
+    cout << "Selezione una delle seguenti opzioni:\n"
             "1. Inizia il gioco inserendo le barche\n"
             "2. Inizia il gioco con barche random\n"
             "3. Esci\n";
-    int choice;
+    fillMode choice;
     do {
         cout << "Scelta: ";
         cin >> choice;
-        if (choice < 1 || choice > 3) {
+        if (cin.fail()) {
             cout << "Scelta non valida" << endl;
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         } else {
             break;
@@ -411,34 +481,177 @@ int getStartMenuOption() {
     return choice;
 }
 
-// Displays the start menu and fills the tables accordingly
-void startMenu() {
-    int choice = getStartMenuOption();
+// Fills the tables for the 2-player mode
+void fillTables2PlayersMode() {
+    fillMode choice = getFillMode();
 
     switch (choice) {
-        case 1:
+        case fillMode::userFill:
             for (int i = 0; i < 2; i++) {
                 getTableFromUser(tables[i], i + 1);
                 clearConsole();
             }
             break;
-        case 2:
+        case fillMode::randomFill:
             for (auto &table: tables) {
                 getRandomTable(table);
             }
             clearConsole();
             break;
-        case 3:
+        case fillMode::exitFillMode:
             exit(0);
     }
 }
 
 
-int main() {
-    srand(time(nullptr));
-    clearTables();
+pair<int, int> chooseNextMoveComputer(fireResult lastResult, vector<pair<int, int>> lastHits) {
+    // If the last move was a miss or a sunk, we can just choose a random move
+    if (lastResult == fireResult::miss || lastResult == fireResult::sunk) {
+        return {rand() % DIM_COL, rand() % DIM_ROW};
+    }
 
-    startMenu();
+    // If the last move was a hit, we can choose a random move around the last hit which hasn't been tried yet
+    if (lastResult == fireResult::hit) {
+        auto [lastCol, lastRow] = lastHits.back();
+
+        vector<pair<int, int>> possibleMoves;
+
+        // Preallocate the vector to avoid reallocations
+        possibleMoves.reserve(4);
+
+        // Here we check if the moves are valid
+        if (lastCol - 1 >= 0) {
+            possibleMoves.push_back({lastCol - 1, lastRow});
+        }
+        if (lastCol + 1 < DIM_COL) {
+            possibleMoves.push_back({lastCol + 1, lastRow});
+        }
+        if (lastRow - 1 >= 0) {
+            possibleMoves.push_back({lastCol, lastRow - 1});
+        }
+        if (lastRow + 1 < DIM_ROW) {
+            possibleMoves.push_back({lastCol, lastRow + 1});
+        }
+
+        // Return a random move from the possible moves
+        return possibleMoves[rand() % possibleMoves.size()];
+    }
+}
+
+
+void fillPlayerTable1PlayerMode() {
+    fillMode choice = getFillMode();
+
+    switch (choice) {
+        case fillMode::userFill:
+            getTableFromUser(tables[0], 1);
+            clearConsole();
+            break;
+        case fillMode::randomFill:
+            getRandomTable(tables[0]);
+            clearConsole();
+            break;
+        case fillMode::exitFillMode:
+            exit(0);
+    }
+}
+
+
+void fillTables1PlayerMode() {
+    fillPlayerTable1PlayerMode();
+
+    getRandomTable(tables[1]);
+}
+
+// Menu options for playing alone and with the computer
+void playWithComputerMenuOption() {
+    fillTables1PlayerMode();
+
+    cout << "Hai inserito le tue barche, inizia il gioco!\n"
+            "Campo iniziale: \n";
+    printTable(tables[0]);
+
+    // Last move result (only used by the computer player)
+    fireResult lastResult = fireResult::miss;
+    vector<pair<int, int>> lastHits;
+
+    int turn = 0;
+    do {
+        int thisTurnPlayer = turn % 2;
+        int thisTurnOtherPlayer = (thisTurnPlayer + 1) % 2;
+
+#if DEBUG
+        cout << "-- DEBUG INFO --\n";
+        printBothTables();
+        cout << "-- END DEBUG INFO --\n";
+#endif
+
+        switch (thisTurnPlayer) {
+            // Player's turn
+            case 0: {
+                auto [col, row] = getFireCoordinates(thisTurnPlayer + 1);
+                fireResult hit = fireAtCoordinates(col, row, tables[thisTurnOtherPlayer]);
+
+                switch (hit) {
+                    case fireResult::miss:
+                        cout << "Non hai colpito nulla!" << endl;
+                        break;
+                    case fireResult::hit:
+                        cout << "Hai colpito una barca!" << endl;
+                        break;
+                    case fireResult::sunk:
+                        cout << "Hai affondato una barca!" << endl;
+                        if (playerWon()) {
+                            cout << "Hai vinto!" << endl;
+                            return;
+                        }
+                        break;
+                }
+
+                break;
+            }
+                // Computer's turn
+            case 1: {
+                auto [col, row] = chooseNextMoveComputer(lastResult, lastHits);
+                fireResult hit = fireAtCoordinates(col, row, tables[thisTurnOtherPlayer]);
+
+#if DEBUG
+                cout << "-- DEBUG INFO --\n";
+                cout << "Computer ha scelto di sparare a " << col << " " << row << "\n";
+                cout << "-- END DEBUG INFO --\n";
+#endif
+
+                switch (hit) {
+                    case fireResult::miss:
+                        cout << "Il computer non ha colpito nulla!" << endl;
+                        break;
+                    case fireResult::hit:
+                        cout << "Il computer ha colpito una barca!" << endl;
+                        break;
+                    case fireResult::sunk:
+                        cout << "Il computer ha affondato una barca!" << endl;
+                        if (playerWon()) {
+                            cout << "Il computer ha vinto!" << endl;
+                            return;
+                        }
+                        break;
+                }
+
+                lastResult = hit;
+                lastHits.push_back({col, row});
+
+                break;
+            }
+        }
+
+        turn++;
+
+    } while (true);
+
+}
+
+void play2PlayersMenuOption() {
+    fillTables2PlayersMode();
 
     cout << "Entrambi i giocatori hanno inserito le loro barche, inizia il gioco!\n"
             "Campi iniziali: \n";
@@ -451,18 +664,22 @@ int main() {
         auto [col, row] = getFireCoordinates(thisTurnPlayer + 1);
 
         int thisTurnOtherPlayer = (thisTurnPlayer + 1) % 2;
-        bool hit = fireAtCoordinates(col, row, tables[thisTurnOtherPlayer]);
+        fireResult hit = fireAtCoordinates(col, row, tables[thisTurnOtherPlayer]);
 
-        if (hit) {
-            // TODO: Add feedback if the player destroyed a boat
-            cout << "Hai colpito una barca!" << endl;
-
-            if (playerWon()) {
-                cout << "Player " << thisTurnPlayer + 1 << " ha vinto!" << endl;
+        switch (hit) {
+            case fireResult::miss:
+                cout << "Non hai colpito nulla!" << endl;
                 break;
-            }
-        } else {
-            cout << "Nessuna barca colpita" << endl;
+            case fireResult::hit:
+                cout << "Hai colpito una barca!" << endl;
+                break;
+            case fireResult::sunk:
+                cout << "Hai affondato una barca!" << endl;
+                if (playerWon()) {
+                    cout << "Player " << thisTurnPlayer + 1 << " ha vinto!" << endl;
+                    return;
+                }
+                break;
         }
 
         turn++;
@@ -471,6 +688,56 @@ int main() {
 
         clearConsole();
     } while (true);
+}
+
+// Mode Choose Menu
+int getStartMenuChooseMode() {
+    cout << "Benvenuto in Battaglia Navale!\n"
+            "Selezione una delle seguenti opzioni:\n"
+            "1. Gioca contro il computer\n"
+            "2. Gioca contro un altro giocatore\n"
+            "3. Esci\n";
+    int choice;
+    do {
+        cout << "Scelta: ";
+        cin >> choice;
+        if (choice < 1 || choice > 3) {
+            cout << "Scelta non valida" << endl;
+            continue;
+        } else {
+            break;
+        }
+    } while (true);
+    return choice;
+}
+
+void startMenuChooseMode() {
+    int choice = getStartMenuChooseMode();
+
+    switch (choice) {
+        case 1:
+            playWithComputerMenuOption();
+            break;
+        case 2:
+            play2PlayersMenuOption();
+            break;
+        case 3:
+            exit(0);
+        default:
+            __builtin_unreachable();
+    }
+}
+
+
+int main() {
+    srand(time(nullptr));
+    clearTables();
+
+#if DEBUG
+    cout << "DEBUG MODE" << endl;
+#endif
+
+    startMenuChooseMode();
 
     return 0;
 }
