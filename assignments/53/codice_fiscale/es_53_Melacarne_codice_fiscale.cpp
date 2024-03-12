@@ -14,8 +14,8 @@ string getCode() {
 }
 
 bool isMonthValid(char month) {
-    for (int i = 0; i < MONTHS_LENGTH; i++) {
-        if (month == MONTHS[i]) {
+    for (char m : MONTHS) {
+        if (month == m) {
             return true;
         }
     }
