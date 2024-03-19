@@ -6,7 +6,7 @@ using namespace std;
 constexpr int SIZE = 30;
 constexpr int MAX = 1000;
 
-array<int, SIZE> getRandomArray() {
+array<int, SIZE> getOrderedRandomArray() {
     array<int, SIZE> arr;
 
     for (auto &e: arr) {
@@ -42,7 +42,7 @@ void printArray(const array<int, SIZE> &arr) {
 }
 
 int main() {
-    array<int, SIZE> arr = getRandomArray();
+    array<int, SIZE> arr = getOrderedRandomArray();
 
     sortArray(arr);
     printArray(arr);
