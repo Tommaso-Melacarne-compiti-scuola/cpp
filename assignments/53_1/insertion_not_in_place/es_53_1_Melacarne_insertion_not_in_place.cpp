@@ -14,7 +14,6 @@ void shiftRight(array<int, CAPACITY> &arr, const int len, const int idx) {
     for (int i = len - 1; i > idx; i--) {
         arr[i] = arr[i - 1];
     }
-    return;
 }
 
 void orderedInsert(array<int, CAPACITY> &arr, int &len, const int n) {
@@ -28,7 +27,6 @@ void orderedInsert(array<int, CAPACITY> &arr, int &len, const int n) {
     }
     arr[len] = n;
     len++;
-    return;
 }
 
 void insertNumbers(array<int, CAPACITY> &arr, int &len) {
@@ -36,7 +34,6 @@ void insertNumbers(array<int, CAPACITY> &arr, int &len) {
         int n = getRandom();
         orderedInsert(arr, len, n);
     }
-    return;
 }
 
 void printArray(const array<int, CAPACITY> &arr, const int len) {
@@ -45,11 +42,10 @@ void printArray(const array<int, CAPACITY> &arr, const int len) {
         cout << arr[i] << ", ";
     }
     cout << arr[len - 1] << "]" << endl;
-    return;
 }
 
 int main() {
-    array<int, CAPACITY> arr;
+    array<int, CAPACITY> arr{};
     int len = 0;
 
     insertNumbers(arr, len);
