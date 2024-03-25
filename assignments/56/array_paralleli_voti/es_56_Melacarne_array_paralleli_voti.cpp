@@ -61,6 +61,5 @@ int main() {
 
     printBiggerOrEqualThan(votes, names, avg);
 
-
     return 0;
 }
