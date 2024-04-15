@@ -10,6 +10,7 @@ constexpr int STUDENT_VOTES = 5;
 constexpr int STUDENTS = 10;
 constexpr int MAX_NAME_LENGTH = 10;
 constexpr int PRECISON_FACTOR = 100;
+constexpr int YEAR_PARTS = 2;
 
 const array<string, 8> SUBJECTS = {"Matematica", "Fisica", "Chimica", "Biologia", "Storia", "Geografia", "Letteratura",
                                    "Arte"};
@@ -25,11 +26,15 @@ typedef struct {
     vector<Vote> votes;
 } Subject;
 
+typedef struct {
+    vector<Subject> subjects;
+} YearPart;
+
 // A student with a name, a surname and a vector of subjects
 typedef struct {
     string name;
     string surname;
-    vector<Subject> subjects;
+    vector<YearPart> yearParts;
 } Student;
 
 // Returns a random vote with a maximum value of maxValue
@@ -65,11 +70,24 @@ vector<Subject> getRandomSubjects(int nVotes, float maxValue) {
 
     subjects.reserve(SUBJECTS.size());
 
-    for (const string& subject: SUBJECTS) {
+    for (const string &subject: SUBJECTS) {
         subjects.push_back(getRandomSubject(subject, nVotes, maxValue));
     }
 
     return subjects;
+}
+
+// Returns a vector of n year parts with random subjects
+vector<YearPart> getRandomYearParts(int n) {
+    vector<YearPart> yearParts;
+    yearParts.reserve(n);
+    for (int i = 0; i < n; i++) {
+        YearPart yearPart{
+                .subjects = getRandomSubjects(STUDENT_VOTES, MAX_VOTE)
+        };
+        yearParts.push_back(yearPart);
+    }
+    return yearParts;
 }
 
 // Returns a random string of length n
@@ -93,7 +111,7 @@ vector<Student> getRandomStudent(int n) {
         Student student{
                 .name = getRandomString(MAX_NAME_LENGTH),
                 .surname = getRandomString(MAX_NAME_LENGTH),
-                .subjects = getRandomSubjects(STUDENT_VOTES, MAX_VOTE)
+                .yearParts = getRandomYearParts(YEAR_PARTS)
         };
 
         students.push_back(student);
@@ -110,13 +128,21 @@ float getSubjectAverage(const Subject &subject) {
     return sum / (float) subject.votes.size();
 }
 
+float getYearPartAverage(const YearPart &yearPart) {
+    float sum = 0;
+    for (const auto &subject: yearPart.subjects) {
+        sum += getSubjectAverage(subject);
+    }
+    return sum / (float) yearPart.subjects.size();
+}
+
 // Returns the average of the votes of a student
 float getStudentAverage(const Student &student) {
     float sum = 0;
-    for (const auto &subject: student.subjects) {
-        sum += getSubjectAverage(subject);
+    for (const auto &yearPart: student.yearParts) {
+        sum += getYearPartAverage(yearPart);
     }
-    return sum / (float) student.subjects.size();
+    return sum / (float) student.yearParts.size();
 }
 
 // Returns the student with the highest average
@@ -137,15 +163,16 @@ Student getStudentWithMaxAverage(const vector<Student> &students) {
 
 // Prints all the student's  information
 void printStudent(const Student &student) {
-    cout << "Nome: " << student.name << endl;
-    cout << "Cognome: " << student.surname << endl;
-    for (const auto &subject: student.subjects) {
-        cout << "Materia: " << subject.name << endl;
-        cout << "Voti: ";
-        for (const auto &vote: subject.votes) {
-            cout << vote.value << " ";
+    cout << "Nome: " << student.name << "\n";
+    cout << "Cognome: " << student.surname << "\n";
+    cout << "Voti: \n";
+    for (const auto &yearPart: student.yearParts) {
+        for (const auto &subject: yearPart.subjects) {
+            cout << subject.name << ": ";
+            for (const auto &vote: subject.votes) {
+                cout << vote.value << " ";
+            }
         }
-        cout << endl;
     }
     cout << endl;
 }
