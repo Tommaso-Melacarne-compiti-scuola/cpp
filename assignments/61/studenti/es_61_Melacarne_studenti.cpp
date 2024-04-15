@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 #include <array>
+#include <algorithm>
 
 using namespace std;
 
@@ -104,7 +105,7 @@ string getRandomString(int length) {
 }
 
 // Returns a vector of n random students
-vector<Student> getRandomStudent(int n) {
+vector<Student> getRandomStudents(int n) {
     vector<Student> students;
     students.reserve(n);
     for (int i = 0; i < n; i++) {
@@ -145,8 +146,13 @@ float getStudentAverage(const Student &student) {
     return sum / (float) student.yearParts.size();
 }
 
+struct MaxAverage {
+    Student student;
+    float average;
+};
+
 // Returns the student with the highest average
-Student getStudentWithMaxAverage(const vector<Student> &students) {
+MaxAverage getStudentWithMaxAverage(const vector<Student> &students) {
     Student maxStudent = students[0];
     float maxAverage = getStudentAverage(maxStudent);
 
@@ -158,7 +164,10 @@ Student getStudentWithMaxAverage(const vector<Student> &students) {
         }
     }
 
-    return maxStudent;
+    return MaxAverage{
+            .student = maxStudent,
+            .average = maxAverage
+    };
 }
 
 // Prints all the student's  information
@@ -177,13 +186,91 @@ void printStudent(const Student &student) {
     cout << endl;
 }
 
+// Prints the student with the highest average
+void printMaxStudent(const vector<Student> &students) {
+    MaxAverage maxStudent = getStudentWithMaxAverage(students);
+
+    cout << "Studente con la media più alta: "
+            "\nMedia: " << maxStudent.average << "\n";
+    printStudent(maxStudent.student);
+}
+
+// Sorts the students by name
+void sortStudentsByName(vector<Student> &students) {
+    sort(students.begin(), students.end(), [](const Student &a, const Student &b) {
+        return a.name < b.name;
+    });
+}
+
+// Sorts the students by surname
+void sortStudentsBySurname(vector<Student> &students) {
+    sort(students.begin(), students.end(), [](const Student &a, const Student &b) {
+        return a.surname < b.surname;
+    });
+}
+
+// Sorts the students by average
+void sortStudentsByAverage(vector<Student> &students) {
+    sort(students.begin(), students.end(), [](const Student &a, const Student &b) {
+        return getStudentAverage(a) < getStudentAverage(b);
+    });
+}
+
+// Prints the students
+void printStudents(const vector<Student> &students) {
+    for (int i = 0; i < students.size(); i++) {
+        cout << "Studente " << i + 1 << "\n";
+        printStudent(students[i]);
+    }
+}
+
+int getMenuOption() {
+    int option;
+    cout << "1. Stampa studenti\n"
+            "2. Studente con la media più alta\n"
+            "3. Studenti in ordine crescente di nome\n"
+            "4. Studenti in ordine crescente di cognome\n"
+            "5. Studenti in ordine crescente di media voti\n"
+            "0. Esci\n"
+            "Scelta: ";
+    cin >> option;
+    return option;
+}
+
+void displayMenu(vector<Student> &students) {
+    int option = getMenuOption();
+
+    switch (option) {
+        case 1:
+            printStudents(students);
+            break;
+        case 2:
+            printMaxStudent(students);
+            break;
+        case 3:
+            sortStudentsByName(students);
+            printStudents(students);
+            break;
+        case 4:
+            sortStudentsBySurname(students);
+            printStudents(students);
+            break;
+        case 5:
+            sortStudentsByAverage(students);
+            printStudents(students);
+            break;
+        case 0:
+            return;
+        default:
+            cout << "Scelta non valida\n";
+            break;
+    }
+}
+
 int main() {
-    vector<Student> students = getRandomStudent(STUDENTS);
+    vector<Student> students = getRandomStudents(STUDENTS);
 
-    Student maxStudent = getStudentWithMaxAverage(students);
-
-    cout << "Studente con la media più alta: " << endl;
-    printStudent(maxStudent);
+    displayMenu(students);
 
     return 0;
 }
