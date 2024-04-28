@@ -56,7 +56,7 @@ Choice displayMenu() {
 
 void newEmployee(vector<Employee> &employees) {
     Employee employee;
-    auto& [id, name, lastname, birthdate, salary] = employee;
+    auto &[id, name, lastname, birthdate, salary] = employee;
 
     cout << "Inserisci l'id del dipendente: ";
     cin >> id;
@@ -77,7 +77,7 @@ void updateSalary(vector<Employee> &employees) {
     cout << "Inserisci l'id del dipendente: ";
     cin >> id;
 
-    for (auto &employee : employees) {
+    for (auto &employee: employees) {
         if (employee.id == id) {
             cout << "Inserisci il nuovo stipendio: ";
             cin >> employee.salary;
@@ -114,10 +114,11 @@ void deleteEmployee(vector<Employee> &employees) {
 
 void printEmployee(const Employee &employee) {
     cout << "Id: " << employee.id << "\n"
-            "Nome: " << employee.name << "\n"
-            "Cognome: " << employee.lastname << "\n"
-            "Data di nascita: " << employee.birthdate << "\n"
-            "Stipendio: " << employee.salary << "\n";
+                                     "Nome: " << employee.name << "\n"
+                                                                  "Cognome: " << employee.lastname << "\n"
+                                                                                                      "Data di nascita: "
+         << employee.birthdate << "\n"
+                                  "Stipendio: " << employee.salary << "\n";
 }
 
 void searchEmployee(vector<Employee> &employees) {
@@ -125,7 +126,7 @@ void searchEmployee(vector<Employee> &employees) {
     cout << "Inserisci l'id del dipendente: ";
     cin >> id;
 
-    for (auto &employee : employees) {
+    for (auto &employee: employees) {
         if (employee.id == id) {
             cout << "Dipendente trovato:\n";
             printEmployee(employee);
@@ -135,7 +136,7 @@ void searchEmployee(vector<Employee> &employees) {
     cout << "Dipendente non trovato\n";
 }
 
-template <typename T, typename Cmp>
+template<typename T, typename Cmp>
 int partition(vector<T> &arr, int low, int high, Cmp compare) {
     int pivotIdx = low;
     T pivot = arr[pivotIdx];
@@ -156,8 +157,9 @@ int partition(vector<T> &arr, int low, int high, Cmp compare) {
     return high;
 }
 
-template <typename T, typename Cmp>
-void quickSort(vector<T> &arr, int low, int high, Cmp compare){
+template<typename T, typename Cmp>
+requires std::invocable<Cmp, const T &, const T &>
+void quickSort(vector<T> &arr, int low, int high, Cmp compare) {
     if (low < high) {
         int pivot = partition(arr, low, high, compare);
         quickSort(arr, low, pivot - 1, compare);
