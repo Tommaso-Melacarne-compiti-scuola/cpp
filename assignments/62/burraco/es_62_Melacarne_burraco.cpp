@@ -11,13 +11,23 @@ constexpr int PLAYERS = 4;
 
 constexpr int N_CARDS = 52 * 2 + 4;
 constexpr int CARDS_PER_PLAYER = 11;
-constexpr int JOLLY_VALUE = -1;
+constexpr int JOKER_VALUE = 0;
 constexpr int N_RANKS = 13;
-const array<string, 4> SUITS = {"♠", "♥", "♦", "♣"};
+
+constexpr int N_SUITS = 5;
+const array<string, N_SUITS> SUITS = {"🃟", "♠", "♥", "♦", "♣"};
+
+enum Suit {
+    JOKER = 0,
+    SPADES = 1,
+    HEARTS = 2,
+    DIAMONDS = 3,
+    CLUBS = 4
+};
 
 typedef struct {
     int value;
-    string suit;
+    Suit suit;
 } Card;
 
 typedef struct {
@@ -42,10 +52,10 @@ Deck initDeck() {
 
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < N_RANKS; j++) {
-            for (const auto &suit: SUITS) {
+            for (int suit = 0; suit < N_SUITS; suit++) {
                 Card card{
                         .value = j,
-                        .suit = suit
+                        .suit = static_cast<Suit>(suit)
                 };
                 deck.push_back(card);
             }
@@ -54,11 +64,11 @@ Deck initDeck() {
 
 
     for (int i = 0; i < 4; i++) {
-        Card jolly{
-                .value = JOLLY_VALUE,
-                .suit = ""
+        Card joker{
+                .value = JOKER_VALUE,
+                .suit = Suit::JOKER
         };
-        deck.push_back(jolly);
+        deck.push_back(joker);
     }
 
     shuffleDeck(deck);
@@ -113,12 +123,24 @@ void sortAllPlayersCardsByValue(vector<Player> &players) {
     }
 }
 
+string getSuitStringFromSuit(Suit suit) {
+    return SUITS[suit];
+}
+
+string getCardFromSuitAndValue(int value, Suit suit) {
+    if (suit == Suit::JOKER) {
+        return getSuitStringFromSuit(suit);
+    }
+
+    return to_string(value) + getSuitStringFromSuit(suit);
+}
+
 void displayAllPlayersCardsSortedByValue(vector<Player> &players) {
     sortAllPlayersCardsByValue(players);
     for (const auto &[i, player]: std::ranges::views::enumerate(players)) {
         cout << "Player " << i + 1 << " cards: ";
         for (const auto &card: player.cards) {
-            cout << card.value << card.suit << " ";
+            cout << getCardFromSuitAndValue(card.value, card.suit) << " ";
         }
         cout << endl;
     }
