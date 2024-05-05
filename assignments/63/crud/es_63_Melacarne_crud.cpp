@@ -136,25 +136,34 @@ void searchEmployee(vector<Employee> &employees) {
     cout << "Dipendente non trovato\n";
 }
 
+template<typename T>
+void customSwap(T &a, T &b) {
+    T temp = a;
+    a = b;
+    b = temp;
+}
+
+
 template<typename T, typename Cmp>
 int partition(vector<T> &arr, int low, int high, Cmp compare) {
-    int pivotIdx = low;
+    int pivotIdx = low + (high - low) / 2;
     T pivot = arr[pivotIdx];
+    customSwap(arr[pivotIdx], arr[low]);
 
     while (low < high) {
-        while (compare(arr[low], pivot)) {
+        while ((compare(arr[low], pivot)) && (low < high)) {
             low++;
         }
         while (!compare(arr[high], pivot)) {
             high--;
         }
         if (low < high) {
-            swap(arr[low], arr[high]);
+            customSwap(arr[low], arr[high]);
         }
     }
 
-    swap(arr[pivotIdx], arr[high]);
-    return high;
+    customSwap(arr[low], arr[pivotIdx]);
+    return low;
 }
 
 template<typename T, typename Cmp>
@@ -185,6 +194,13 @@ void sortBySalaryDesc(vector<Employee> &employees) {
     });
 }
 
+void printEmployees(const vector<Employee> &employees) {
+    for (const auto &employee: employees) {
+        printEmployee(employee);
+        cout << "\n";
+    }
+}
+
 int main() {
     vector<Employee> employees;
 
@@ -211,14 +227,17 @@ int main() {
             case SORT_BY_LASTNAME:
                 cout << "Ordina e stampa l'array per cognome\n";
                 sortByLastname(employees);
+                printEmployees(employees);
                 break;
             case SORT_BY_SALARY_ASC:
                 cout << "Ordina e stampa l'array per stipendio crescente\n";
                 sortBySalaryAsc(employees);
+                printEmployees(employees);
                 break;
             case SORT_BY_SALARY_DESC:
                 cout << "Ordina e stampa l'array per stipendio decrescente\n";
                 sortBySalaryDesc(employees);
+                printEmployees(employees);
                 break;
             case EXIT:
                 cout << "Uscita dal programma\n";
