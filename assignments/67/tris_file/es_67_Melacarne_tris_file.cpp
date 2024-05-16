@@ -187,10 +187,29 @@ FieldCoords getCoords(int currentPlayerId) {
     FieldCoords coords;
 
     string currentPlayer = currentPlayerId == Player::PLAYER_1 ? "X" : "O";
-    cout << "Giocatore " << currentPlayer << " inserisci la coordinata x: ";
-    cin >> coords.x;
-    cout << "Giocatore " << currentPlayer << " inserisci la coordinata y: ";
-    cin >> coords.y;
+
+    do {
+        cout << "Giocatore " << currentPlayer << " inserisci la coordinata x: ";
+        cin >> coords.x;
+
+        if (coords.x < 0 || coords.x >= GRID_SIZE) {
+            cout << "Coordinata x non valida\n";
+        } else {
+            break;
+        }
+    } while (true);
+
+    do {
+        cout << "Giocatore " << currentPlayer << " inserisci la coordinata y: ";
+        cin >> coords.y;
+
+        if (coords.y < 0 || coords.y >= GRID_SIZE) {
+            cout << "Coordinata y non valida\n";
+        } else {
+            break;
+        }
+    } while (true);
+
     return coords;
 }
 
@@ -200,7 +219,12 @@ void play(Game &game) {
         printGrid(game.grid);
         coords = getCoords(game.currentPlayer);
 
-    } while (game.grid.fields[coords.x][coords.y] != Field::EMPTY);
+        if (game.grid.fields[coords.x][coords.y] != Field::EMPTY) {
+            cout << "La casella è già occupata\n";
+        } else {
+            break;
+        }
+    } while (true);
 
     game.grid.fields[coords.x][coords.y] = game.currentPlayer == Player::PLAYER_1 ? Field::X : Field::O;
 
